@@ -1,5 +1,6 @@
 import { relations } from "drizzle-orm";
-import { pgTable, text, timestamp, boolean, index } from "drizzle-orm/pg-core";
+import { pgTable, text, timestamp, boolean, integer, index } from "drizzle-orm/pg-core";
+import { userRoleEnum, languageCodeEnum } from "./enums";
 
 export const user = pgTable("user", {
   id: text("id").primaryKey(),
@@ -7,6 +8,13 @@ export const user = pgTable("user", {
   email: text("email").notNull().unique(),
   emailVerified: boolean("email_verified").default(false).notNull(),
   image: text("image"),
+  role: userRoleEnum("role").default("learner").notNull(),
+  timezone: text("timezone").default("UTC").notNull(),
+  nickname: text("nickname").default("new user").notNull(),
+  nativeLanguage: text("native_language"),
+  gemsBalance: integer("gems_balance").default(0).notNull(),
+  activeLanguage: languageCodeEnum("active_language").notNull(),
+  deletedAt: timestamp("deleted_at"),
   createdAt: timestamp("created_at").defaultNow().notNull(),
   updatedAt: timestamp("updated_at")
     .defaultNow()

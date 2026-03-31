@@ -1,0 +1,45 @@
+import { fail, redirect } from '@sveltejs/kit';
+import type { Actions, PageServerLoad } from './$types';
+import { auth } from '$lib/server/auth';
+import { signInSchema } from '$lib/schemas';
+import { APIError } from 'better-auth/api';
+
+export const load: PageServerLoad = async (event) => {
+	if (event.locals.user) {
+		return redirect(302, '/');
+	}
+	const reset = event.url.searchParams.get('reset');
+	return { resetSuccess: reset === 'success' };
+};
+
+export const actions: Actions = {
+	default: async (event) => {
+		const formData = await event.request.formData();
+		const raw = {
+			email: formData.get('email')?.toString() ?? '',
+			password: formData.get('password')?.toString() ?? ''
+		};
+
+		const result = signInSchema.safeParse(raw);
+		if (!result.success) {
+			return fail(400, { errors: result.error.flatten().fieldErrors, values: raw });
+		}
+
+		try {
+			await auth.api.signInEmail({
+				body: {
+					email: result.data.email,
+					password: result.data.password
+				},
+				headers: event.request.headers
+			});
+		} catch (error) {
+			if (error instanceof APIError) {
+				return fail(400, { message: error.message || 'Sign in failed', values: raw });
+			}
+			return fail(500, { message: 'Unexpected error', values: raw });
+		}
+
+		return redirect(302, '/');
+	}
+};
