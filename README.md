@@ -8,7 +8,7 @@ To recreate this project with the same configuration:
 
 ```sh
 # recreate this project
-pnpm dlx sv@0.13.0 create --template minimal --types ts --add tailwindcss="plugins:typography,forms" drizzle="database:postgresql+postgresql:postgres.js+docker:no" sveltekit-adapter="adapter:auto" better-auth="demo:password" --install pnpm ./libiamo-fullstack
+pnpm dlx sv@0.13.0 create --template minimal --types ts --add drizzle="database:postgresql+postgresql:postgres.js+docker:no" sveltekit-adapter="adapter:auto" better-auth="demo:password" --install pnpm ./libiamo-fullstack
 ```
 
 ## Developing
@@ -33,7 +33,7 @@ You can preview the production build with `pnpm preview`.
 
 
 ## User Avatars (Cravatar Integration)
-Libiamo uses [Cravatar](https://cravatar.cn) (a Gravatar alternative optimized for speed) to manage user avatars. 
+Libiamo uses [Cravatar](https://cravatar.cn) (a Gravatar alternative optimized for speed) to manage user avatars.
 - **Zero Local Storage:** Avatars are dynamically generated based on the MD5 hash of the user's registered email address, saving significant server storage and database complexity.
 - **Default Fallbacks:** If user's email doesn't have a linked avatar on Cravatar or Gravatar, an automatic `ident-icon` (a visually unique geometric pattern) is presented.
 - **Global Sync:** Users can change their avatars globally across multiple platforms by updating it once on Cravatar or Gravatar website.

@@ -3,8 +3,6 @@
 @import "@fontsource-variable/inter";
 
 @custom-variant dark (&:is(.dark *));
-@plugin "@tailwindcss/forms";
-@plugin "@tailwindcss/typography";
 
 :root {
 	--background: oklch(0.965 0.01 75);

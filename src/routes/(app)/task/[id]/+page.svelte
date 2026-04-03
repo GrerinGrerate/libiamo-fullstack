@@ -54,7 +54,7 @@ function difficultyDots(level: number) {
 		<Separator />
 		<div>
 			<h2 class="mb-3 text-lg font-semibold">Background Material</h2>
-			<div class="prose prose-sm max-w-none">{@html task.backgroundHtml}</div>
+			<div class="max-w-none">{@html task.backgroundHtml}</div>
 		</div>
 	{/if}
 
