@@ -1,71 +1,99 @@
 <script lang="ts">
+import ArrowLeft from "@lucide/svelte/icons/arrow-left";
+import Clock from "@lucide/svelte/icons/clock";
+import Gem from "@lucide/svelte/icons/gem";
+import Star from "@lucide/svelte/icons/star";
 import { Badge } from "$lib/components/ui/badge";
 import { Button } from "$lib/components/ui/button";
-import { Separator } from "$lib/components/ui/separator";
 
 let { data } = $props();
 let task = $derived(data.task);
 
 const objectives = $derived((task.objectivesResolved as { order: number; text: string }[] | null) ?? []);
 
-function difficultyDots(level: number) {
-	return Array.from({ length: 3 }, (_, i) => i < level);
+const typeLabels: Record<string, string> = {
+	chat: "Chat",
+	oneshot: "One-shot",
+	slow: "Slow Reply",
+	translate: "Translate",
+};
+
+const uiLabels: Record<string, string> = {
+	reddit: "Reddit",
+	apple_mail: "Mail",
+	discord: "Discord",
+	imessage: "iMessage",
+	ao3: "AO3",
+	translator: "Translator",
+};
+
+function difficultyLabel(level: number): string {
+	return ["Beginner", "Intermediate", "Advanced"][level - 1] ?? `Level ${level}`;
 }
 </script>
 
-<div class="mx-auto max-w-3xl space-y-6">
-	<a href="/" class="text-sm text-muted-foreground hover:underline">&larr; Back to Task Hall</a>
+<div class="fixed inset-0 bg-card"></div>
 
-	<div>
-		<h1 class="text-3xl font-bold">{task.titleResolved}</h1>
-		<div class="mt-2 flex flex-wrap items-center gap-3">
-			<Badge variant="secondary">{task.templateType}</Badge>
-			<Badge variant="outline">{task.templateUi}</Badge>
-			<span class="flex gap-0.5">
-				{#each difficultyDots(task.templateDifficulty) as filled}
-					<span class="inline-block h-2.5 w-2.5 rounded-full {filled ? 'bg-foreground' : 'bg-border'}"></span>
-				{/each}
-			</span>
-			{#if task.estimatedWords}
-				<span class="text-sm text-muted-foreground">~{task.estimatedWords} words</span>
-			{/if}
-			{#if task.maxTurns}
-				<span class="text-sm text-muted-foreground">{task.maxTurns} turns</span>
-			{/if}
-		</div>
-	</div>
+<div class="task-stagger relative z-10 mx-auto max-w-2xl flex flex-col min-h-[calc(100vh-8rem)]">
+	<a href="/" class="group flex w-fit items-center gap-2 text-muted-foreground transition-colors hover:text-foreground">
+		<ArrowLeft size={18} strokeWidth={1.5} class="transition-transform group-hover:-translate-x-1" />
+		<span class="text-sm font-medium uppercase tracking-wide">Return to Quest Hall</span>
+	</a>
 
-	{#if task.descriptionResolved}
-		<p class="text-muted-foreground">{task.descriptionResolved}</p>
-	{/if}
-
-	{#if objectives.length > 0}
+	<div class="mt-12 flex-1 flex flex-col">
 		<div>
-			<h2 class="mb-2 text-lg font-semibold">Objectives</h2>
-			<ol class="list-inside list-decimal space-y-1 text-sm text-muted-foreground">
-				{#each objectives.sort((a, b) => a.order - b.order) as obj}
-					<li>{obj.text}</li>
-				{/each}
-			</ol>
+			<div class="mb-4 flex flex-wrap items-center gap-2">
+				<Badge variant="secondary" class="text-[10px] font-bold uppercase tracking-widest"> {uiLabels[task.templateUi] ?? task.templateUi} </Badge>
+				<Badge variant="outline" class="text-[10px] font-bold uppercase tracking-widest">
+					{typeLabels[task.templateType] ?? task.templateType}
+				</Badge>
+				<span class="text-[10px] font-bold uppercase tracking-widest text-muted-foreground"> {difficultyLabel(task.templateDifficulty)} </span>
+			</div>
+			<h1 class="font-serif text-3xl md:text-5xl text-foreground leading-tight">{task.titleResolved}</h1>
 		</div>
-	{/if}
 
-	{#if task.backgroundHtml}
-		<Separator />
-		<div>
-			<h2 class="mb-3 text-lg font-semibold">Background Material</h2>
-			<div class="max-w-none">{@html task.backgroundHtml}</div>
+		{#if task.descriptionResolved}
+			<p class="mt-8 max-w-xl text-base font-light leading-relaxed text-muted-foreground">{task.descriptionResolved}</p>
+		{/if}
+
+		{#if objectives.length > 0}
+			<div class="mt-8">
+				<h2 class="mb-3 text-xs font-bold uppercase tracking-widest text-muted-foreground">Objectives</h2>
+				<ol class="list-inside list-decimal space-y-1.5 text-base font-light leading-relaxed text-muted-foreground max-w-xl">
+					{#each objectives.sort((a, b) => a.order - b.order) as obj}
+						<li>{obj.text}</li>
+					{/each}
+				</ol>
+			</div>
+		{/if}
+
+		{#if task.bgKnowledgeHtml}
+			<div class="mt-10">
+				<h2 class="mb-4 text-xs font-bold uppercase tracking-widest text-muted-foreground">Background Material</h2>
+				<div class="prose prose-neutral max-w-xl text-base font-light leading-relaxed">{@html task.bgKnowledgeHtml}</div>
+			</div>
+		{/if}
+
+		<div class="mt-auto pt-12 pb-4">
+			<div class="h-px w-full bg-border mb-6"></div>
+			<div class="flex items-center justify-between">
+				<div class="flex items-center gap-4 text-sm text-muted-foreground">
+					<span class="flex items-center gap-1.5">
+						<Star size={14} strokeWidth={1.5} />
+						{task.pointReward}
+						pts
+					</span>
+					<span class="flex items-center gap-1.5">
+						<Gem size={14} strokeWidth={1.5} />
+						{task.gemReward}
+						gems
+					</span>
+					{#if task.estimatedWords}
+						<span class="flex items-center gap-1.5"> <Clock size={14} strokeWidth={1.5} />~{task.estimatedWords} words </span>
+					{/if}
+				</div>
+				<Button disabled class="px-8">Start Practice</Button>
+			</div>
 		</div>
-	{/if}
-
-	<Separator />
-
-	<div class="flex items-center justify-between">
-		<div class="text-sm text-muted-foreground">
-			<span>{task.pointReward} pts</span>
-			<span class="mx-1">&middot;</span>
-			<span>{task.gemReward} gems</span>
-		</div>
-		<Button disabled>Start Practice (Coming Soon)</Button>
 	</div>
 </div>

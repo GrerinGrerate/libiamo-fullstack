@@ -1,133 +1,72 @@
-# Libiamo
+# CLAUDE.md
 
-Language learning app that simulates real social interactions (Reddit, Discord, email, etc.) using LLM agents. Users complete communication tasks to develop pragmatic language skills.
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
 
-## Tech Stack
+## Commands
 
-- Fullstack with SvelteKit (SSR, MPA architecture) and Svelte 5
-- pnpm
-- Biome (format + lint)
-- Zod (validation)
-- Drizzle ORM + PostgreSQL
-- TailwindCSS v4 + shadcn-svelte
-- better-auth (email/password, SMTP for signup verification emails)
+```sh
+pnpm dev          # start dev server
+pnpm build        # production build
+pnpm preview      # start server on production build
+pnpm check        # svelte-check + biome check --write (full type check + lint)
+pnpm lint         # biome lint only
+pnpm format       # biome format --write
+pnpm db:push      # push schema changes to DB (no migration file)
+```
 
-## Design
+## Architecture
 
-Editorial elegance, Renaissance magazine aesthetic.
+**Libiamo** is a language learning app (en/es/fr/ja) that simulates social platforms (Reddit, Discord, email, iMessage, AO3). Users complete communication tasks to develop pragmatic language skills.
 
-Colors:
-- Background: warm cream
-- Text: charcoal (not pure black)
-- Accents: Morandi pastels - vintage yellow, gray-blue, sage green, dusty rose
+### Route Groups
 
-Typography:
-- Headings: Playfair Display or Newsreader (serif)
-- Body/UI: sans-serif
+- `(app)/` — authenticated user-facing pages (hall, task detail, profile). Layout redirects unauthenticated users to `/sign-in`.
+- `(auth)/` — sign-in, sign-up, forgot/reset password, email verify.
+- `(admin)/` — admin panel at `/admin/templates` and `/admin/schedule`.
 
-Task Hall (home) interaction:
-- Mobile: vertically stacked overlapping cards showing icon + title + difficulty (3 circles). Tap to expand accordion-style, revealing description/objectives and enter button.
-- Desktop: cards laid out fully, no stacking needed.
+### Server-side Code (`src/lib/server/`)
 
-Refer to frontend-design skill for more detailed UI implementation.
+- `auth.ts` — better-auth instance with email/password, email verification, and additional user fields (`role`, `activeLanguage`, `timezone`, `nativeLanguage`, `gemsBalance`).
+- `db/index.ts` — exports `db` (Drizzle client connected via `DATABASE_URL`).
+- `db/schema.ts` — business tables: `userLearningProfile`, `template`, `task`. Imports and re-exports `auth.schema.ts` and `enums.ts`.
+- `db/auth.schema.ts` — **auto-generated** but manually added columns to user table.
+- `email.ts` — nodemailer wrapper for sending transactional email.
+- `tasks.ts` — `ensureTasksForDate()` auto-schedules tasks on each page load by picking the least-recently-scheduled active templates. `scheduleTaskManually()` is used by the admin schedule page.
 
-## Routes
+### Auth Flow
 
-Layout groups share no URL prefix. `(app)` layout loads user data and redirects unauthenticated visitors to `/sign-in`. `(admin)` layout additionally checks `user.role === 'admin'`.
+`hooks.server.ts` calls `auth.api.getSession()` on every request and populates `event.locals.user` and `event.locals.session`. The `(app)` layout server redirects to `/sign-in` if no user. The `App.Locals` type is declared in `src/app.d.ts`.
 
-### Phase A1
+### Template → Task Pipeline
 
-(auth) — minimal layout, no nav
-/sign-in
-/sign-up
-/verify
-/forgot-password
+Templates store base content with `{{slot}}` placeholders and a `candidates` JSONB array (each candidate has `slots` for substitution and optional `context`). When tasks are needed, a random candidate is picked, slots are resolved, and a `task` row is inserted. Weekly tasks are dated to the Monday of the current week; daily tasks are dated to today.
 
-(app) — authenticated layout with nav + language switcher
-/ — Task Hall (home)
-/task/[id] — Task detail + background material
+### i18n
 
-(admin) — admin role required, admin nav
-/admin/templates — template list (filterable)
-/admin/templates/new — create template
-/admin/templates/[id] — view / edit template
-/admin/schedule — view + manage task scheduling
+Custom `t(lang, key)` function in `src/lib/i18n.ts`. The user's `activeLanguage` field drives the language. No external i18n library.
 
-### Phase A2
+### Validation
 
-(app)
-/task/[id]/session — active practice session (LLM chat/write UI)
-/task/[id]/session/[sessionId] — resume or review a past session
-/history — user's practice session history
+All form data is validated with Zod schemas in `src/lib/schemas.ts` — auth schemas, `profileSchema`, `switchLanguageSchema`, `templateSchema`, `scheduleManualSchema`.
 
-## Core Concepts
+### UI
 
-Roles:
-- learner: browse tasks, view backgrounds, complete sessions
-- admin: manage templates, schedule tasks
+- TailwindCSS v4 via `@tailwindcss/vite`. CSS entry at `src/routes/layout.css`.
+- shadcn-svelte (vega style, neutral base, lucide icons). Components in `src/lib/components/ui/`.
+- Non-UI components (`Navbar.svelte`, `WineGlassIcon.svelte`) live in `src/lib/components/` directly.
+- `cn()` in `src/lib/utils.ts` for class merging (clsx + tailwind-merge).
+- User avatars via Cravatar (MD5 of email) — computed in `(app)/+layout.server.ts`.
 
-Template vs Task:
-- Template: reusable blueprint with {{slot}} placeholders and multiple candidates
-- Task: scheduled instance with slots resolved from a random candidate
+### Svelte 5
 
-Task amount:
-- weekly tasks: 3 tasks per week, date stored as Monday
-- daily tasks: 3 task per day
+All `.svelte` files run in runes mode (`$state`, `$props`, `$derived`, etc.) — enforced globally in `svelte.config.js`. Do not use Svelte 4 reactive syntax (`$:`, `export let`).
 
-Task types (how LLM is invoked):
-- chat: real-time multi-turn conversation
-- oneshot: single long response (e.g. AO3 comment)
-- slow: delayed replies (email, forum)
-- translate: translation exercise
+## Important Notes for Claude
 
-UI variants (frontend layout): reddit, apple_mail, discord, imessage, ao3, translator
-
-Auto-scheduling: when user loads tasks for a date with insufficient scheduled tasks (3 weekly, 1+ daily), system auto-fills from active templates, prioritizing oldest lastScheduledAt.
-
-## Multi-language
-
-UI text determined by user.activeLanguage. Task Hall includes language switcher. Store translations in a simple key-value structure or i18n files keyed by language code.
-
-## Phase A1 Scope
-
-- Auth: signup, login, email verification, password reset
-- Task Hall: display weekly/daily tasks for current active language
-- Task detail: view background material and objectives
-- Profile: update settings, switch active language
-- Admin - Templates: list, create, edit, soft-delete (isActive=false)
-- Admin - Scheduling: manual task scheduling, view scheduled tasks
-
-## Phase A2 Scope
-
-Practice sessions:
-- Start session: create practiceSession, randomly select persona from pool
-- Session UI: render platform-specific interface (imessage, reddit, etc.)
-- Send message: user sends message, LLM agent responds (for chat/slow types)
-- Request hint: ask tutor agent for help without consuming turns
-- Complete session: mark complete, trigger evaluation
-- Tutor feedback: LLM evaluates conversation against objectives
-- Rewards: grant points and gems on first completion
-
-Session states:
-- in_progress: active session
-- completed: user finished, awaiting evaluation
-- evaluated: feedback generated
-- abandoned: user left without completing
-
-Turn counting:
-- Each user message = 1 turn
-- maxTurns limits total user messages
-- Hints don't consume turns
-
-## Conventions
-
-- Form validation with Zod, both client and server
-- Use SvelteKit form actions for mutations
-- Server-side data loading in `+page.server.ts`
-- Protect admin routes with role check in hooks or layout
-- Keep components small, extract repeated UI patterns
-
-## Important Hints
-
+- Code style: Tabs for indentation, not spaces. Double quotes for JS/TS strings.
+- During plan: Keep in mind that you should often use the ask for clarify tool to ask user when there are multiple good ways to implement the requested change. When introducing an external package is needed, analyze the pros and cons, ask the user and present alternatives.
+- Use `frontend-design@claude-plugins-official` skill to help with visual design.
+- Before finish: Use `pnpm format` and `pnpm check` to ensure code quality before marking an edit session fully completed.
 - Use context7 mcp tool to look up documentation when getting stuck on problems. Only use it when it's very necessary.
-- Database schema is written in `docs/DB.md`
+- DB schema draft: See `docs/DB.md` for the full planned schema including tables not yet implemented.
+- Roadmap: See `docs/ROADMAP.md` for details of each phase. The LLM/practice-session layer is Phase A2 (not yet implemented).

@@ -42,6 +42,7 @@ async function insertTask(tpl: typeof template.$inferSelect, dateStr: string, or
 			date: dateStr,
 			origin,
 			titleResolved: resolveSlots(tpl.titleBase, slots),
+			shortObjectiveResolved: tpl.shortObjectiveBase ? resolveSlots(tpl.shortObjectiveBase, slots) : null,
 			descriptionResolved: tpl.descriptionBase ? resolveSlots(tpl.descriptionBase, slots) : null,
 			objectivesResolved: resolveObjectives(tpl.objectivesBase as { order: number; text: string }[] | null, slots),
 			agentPromptResolved: tpl.agentPromptBase ? resolveSlots(tpl.agentPromptBase, slots) : null,

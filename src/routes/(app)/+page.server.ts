@@ -23,6 +23,7 @@ export const load: PageServerLoad = async (event) => {
 		.select({
 			id: task.id,
 			titleResolved: task.titleResolved,
+			shortObjectiveResolved: task.shortObjectiveResolved,
 			descriptionResolved: task.descriptionResolved,
 			objectivesResolved: task.objectivesResolved,
 			date: task.date,
@@ -39,6 +40,7 @@ export const load: PageServerLoad = async (event) => {
 		.select({
 			id: task.id,
 			titleResolved: task.titleResolved,
+			shortObjectiveResolved: task.shortObjectiveResolved,
 			descriptionResolved: task.descriptionResolved,
 			objectivesResolved: task.objectivesResolved,
 			date: task.date,

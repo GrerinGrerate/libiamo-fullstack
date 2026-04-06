@@ -17,9 +17,10 @@ type TemplateData = {
 	gemReward?: number;
 	isActive?: boolean;
 	titleBase?: string;
+	shortObjectiveBase?: string | null;
 	descriptionBase?: string | null;
 	agentPromptBase?: string | null;
-	backgroundHtml?: string | null;
+	bgKnowledgeHtml?: string | null;
 	objectivesBase?: unknown;
 	agentPersonaPool?: unknown;
 	candidates?: unknown;
@@ -157,6 +158,11 @@ function jsonStr(val: unknown): string {
 		</div>
 
 		<div class="space-y-2">
+			<Label for="shortObjectiveBase">Short Objective (1-2 sentences, shown on card)</Label>
+			<Textarea id="shortObjectiveBase" name="shortObjectiveBase" rows={2} value={template.shortObjectiveBase ?? ''} />
+		</div>
+
+		<div class="space-y-2">
 			<Label for="descriptionBase">Description</Label>
 			<Textarea id="descriptionBase" name="descriptionBase" rows={3} value={template.descriptionBase ?? ''} />
 		</div>
@@ -167,8 +173,8 @@ function jsonStr(val: unknown): string {
 		</div>
 
 		<div class="space-y-2">
-			<Label for="backgroundHtml">Background HTML</Label>
-			<Textarea id="backgroundHtml" name="backgroundHtml" rows={4} value={template.backgroundHtml ?? ''} />
+			<Label for="bgKnowledgeHtml">Background HTML</Label>
+			<Textarea id="bgKnowledgeHtml" name="bgKnowledgeHtml" rows={4} value={template.bgKnowledgeHtml ?? ''} />
 		</div>
 
 		<div class="space-y-2">

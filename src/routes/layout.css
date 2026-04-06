@@ -5,9 +5,9 @@
 @custom-variant dark (&:is(.dark *));
 
 :root {
-	--background: oklch(0.965 0.01 75);
+	--background: oklch(0.95 0.01352 78.167);
 	--foreground: oklch(0.25 0.005 285);
-	--card: oklch(0.98 0.008 75);
+	--card: oklch(0.98 0.007 75);
 	--card-foreground: oklch(0.25 0.005 285);
 	--popover: oklch(0.98 0.008 75);
 	--popover-foreground: oklch(0.25 0.005 285);
@@ -42,7 +42,6 @@
 	--color-accent-blue: #8fa3b1;
 	--color-accent-sage: #8faf8f;
 	--color-accent-rose: #c9a4a4;
-	--font-heading: "Playfair Display", Georgia, serif;
 }
 
 .dark {
@@ -80,6 +79,7 @@
 }
 
 @theme inline {
+	--font-serif: "Playfair Display", Georgia, serif;
 	--font-sans: "Inter Variable", sans-serif;
 	--color-sidebar-ring: var(--sidebar-ring);
 	--color-sidebar-border: var(--sidebar-border);
@@ -125,14 +125,17 @@
 	* {
 		@apply border-border outline-ring/50;
 	}
+
 	body {
 		@apply bg-background text-foreground;
 	}
+
 	h1,
 	h2,
 	h3 {
-		font-family: var(--font-heading);
+		font-family: var(--font-serif);
 	}
+
 	html {
 		@apply font-sans;
 	}
@@ -198,9 +201,87 @@
 	}
 }
 
+/* View Transitions: smooth morph for the shared navbar */
+::view-transition-group(main-nav) {
+	animation-duration: 250ms;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.15, 1);
+}
+
+::view-transition-old(main-nav),
+::view-transition-new(main-nav) {
+	animation-duration: 250ms;
+	animation-timing-function: cubic-bezier(0.4, 0, 0.15, 1);
+}
+
+/* View Transitions: page content crossfade with blur & scale */
+::view-transition-old(page-content) {
+	animation: 600ms cubic-bezier(0.22, 1, 0.36, 1) both vt-page-exit;
+}
+
+::view-transition-new(page-content) {
+	animation: 600ms cubic-bezier(0.22, 1, 0.36, 1) both vt-page-enter;
+}
+
+@keyframes vt-page-exit {
+	to {
+		opacity: 0;
+		transform: scale(1.06);
+		filter: blur(10px);
+	}
+}
+
+@keyframes vt-page-enter {
+	from {
+		opacity: 0;
+		filter: blur(8px);
+	}
+}
+
+@keyframes task-content-in {
+	from {
+		opacity: 0;
+		transform: translateY(30px);
+		filter: blur(8px);
+	}
+	to {
+		opacity: 1;
+		transform: translateY(0);
+		filter: blur(0);
+	}
+}
+
+@utility task-stagger {
+	& > * {
+		animation: task-content-in 0.8s ease-out both;
+	}
+
+	& > :nth-child(1) {
+		animation-delay: 0.35s;
+	}
+	& > :nth-child(2) {
+		animation-delay: 0.5s;
+	}
+	& > :nth-child(3) {
+		animation-delay: 0.65s;
+	}
+	& > :nth-child(4) {
+		animation-delay: 0.75s;
+	}
+	& > :nth-child(5) {
+		animation-delay: 0.85s;
+	}
+	& > :nth-child(6) {
+		animation-delay: 0.95s;
+	}
+	& > :nth-child(7) {
+		animation-delay: 1.05s;
+	}
+}
+
 @utility no-scrollbar {
 	-ms-overflow-style: none;
 	scrollbar-width: none;
+
 	&::-webkit-scrollbar {
 		display: none;
 	}

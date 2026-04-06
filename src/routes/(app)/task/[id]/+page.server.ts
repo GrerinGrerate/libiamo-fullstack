@@ -26,7 +26,7 @@ export const load: PageServerLoad = async (event) => {
 			templateType: template.type,
 			templateUi: template.ui,
 			templateDifficulty: template.difficulty,
-			backgroundHtml: template.backgroundHtml,
+			bgKnowledgeHtml: template.bgKnowledgeHtml,
 			estimatedWords: template.estimatedWords,
 			maxTurns: template.maxTurns,
 			pointReward: template.pointReward,

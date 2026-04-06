@@ -33,11 +33,12 @@ export const template = pgTable(
 		duration: taskDurationEnum("duration").notNull(),
 
 		titleBase: text("title_base").notNull(),
+		shortObjectiveBase: text("short_objective_base"),
 		descriptionBase: text("description_base"),
 		objectivesBase: jsonb("objectives_base"),
 		agentPromptBase: text("agent_prompt_base"),
 		agentPersonaPool: jsonb("agent_persona_pool"),
-		backgroundHtml: text("background_html"),
+		bgKnowledgeHtml: text("bg_knowledge_html"),
 		candidates: jsonb("candidates"),
 
 		maxTurns: integer("max_turns"),
@@ -73,6 +74,7 @@ export const task = pgTable(
 		origin: scheduleOriginEnum("origin").notNull(),
 
 		titleResolved: text("title_resolved").notNull(),
+		shortObjectiveResolved: text("short_objective_resolved"),
 		descriptionResolved: text("description_resolved"),
 		objectivesResolved: jsonb("objectives_resolved"),
 		agentPromptResolved: text("agent_prompt_resolved"),

@@ -3,7 +3,7 @@ export type LangCode = "en" | "es" | "fr" | "ja";
 const translations: Record<LangCode, Record<string, string>> = {
 	en: {
 		// Nav
-		"nav.home": "Task Hall",
+		"nav.home": "Quest Hall",
 		"nav.profile": "Profile",
 		"nav.admin": "Admin",
 		"nav.signOut": "Sign Out",
@@ -12,7 +12,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"hall.thisWeek": "This Week",
 		"hall.today": "Today",
 		"hall.enter": "Enter",
-		"hall.noTasks": "No tasks available yet.",
+		"hall.noTasks": "No quests available yet.",
 		"hall.difficulty": "Difficulty",
 
 		// Auth
@@ -45,7 +45,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"admin.schedule": "Schedule",
 		"admin.newTemplate": "New Template",
 		"admin.editTemplate": "Edit Template",
-		"admin.scheduleTask": "Schedule Task",
+		"admin.scheduleTask": "Schedule Quest",
 
 		// Common
 		"common.save": "Save",
@@ -58,7 +58,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"common.error": "Something went wrong.",
 	},
 	es: {
-		"nav.home": "Salón de Tareas",
+		"nav.home": "Salón de Misiones",
 		"nav.profile": "Perfil",
 		"nav.admin": "Admin",
 		"nav.signOut": "Cerrar Sesión",
@@ -66,7 +66,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"hall.thisWeek": "Esta Semana",
 		"hall.today": "Hoy",
 		"hall.enter": "Entrar",
-		"hall.noTasks": "No hay tareas disponibles aún.",
+		"hall.noTasks": "No hay misiones disponibles aún.",
 		"hall.difficulty": "Dificultad",
 
 		"auth.signIn": "Iniciar Sesión",
@@ -96,7 +96,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"admin.schedule": "Calendario",
 		"admin.newTemplate": "Nueva Plantilla",
 		"admin.editTemplate": "Editar Plantilla",
-		"admin.scheduleTask": "Programar Tarea",
+		"admin.scheduleTask": "Programar Misión",
 
 		"common.save": "Guardar",
 		"common.cancel": "Cancelar",
@@ -108,7 +108,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"common.error": "Algo salió mal.",
 	},
 	fr: {
-		"nav.home": "Salle des Tâches",
+		"nav.home": "Salle des Quêtes",
 		"nav.profile": "Profil",
 		"nav.admin": "Admin",
 		"nav.signOut": "Déconnexion",
@@ -116,7 +116,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"hall.thisWeek": "Cette Semaine",
 		"hall.today": "Aujourd'hui",
 		"hall.enter": "Entrer",
-		"hall.noTasks": "Aucune tâche disponible pour le moment.",
+		"hall.noTasks": "Aucune quête disponible pour le moment.",
 		"hall.difficulty": "Difficulté",
 
 		"auth.signIn": "Se Connecter",
@@ -146,7 +146,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"admin.schedule": "Calendrier",
 		"admin.newTemplate": "Nouveau Modèle",
 		"admin.editTemplate": "Modifier le Modèle",
-		"admin.scheduleTask": "Planifier une Tâche",
+		"admin.scheduleTask": "Planifier une Quête",
 
 		"common.save": "Enregistrer",
 		"common.cancel": "Annuler",
@@ -158,7 +158,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"common.error": "Quelque chose s'est mal passé.",
 	},
 	ja: {
-		"nav.home": "任務ホール",
+		"nav.home": "クエストホール",
 		"nav.profile": "プロフィール",
 		"nav.admin": "管理者",
 		"nav.signOut": "サインアウト",
@@ -166,7 +166,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"hall.thisWeek": "今週",
 		"hall.today": "今日",
 		"hall.enter": "入る",
-		"hall.noTasks": "まだ利用可能なタスクはありません。",
+		"hall.noTasks": "まだ利用可能なクエストはありません。",
 		"hall.difficulty": "難易度",
 
 		"auth.signIn": "サインイン",
@@ -196,7 +196,7 @@ const translations: Record<LangCode, Record<string, string>> = {
 		"admin.schedule": "スケジュール",
 		"admin.newTemplate": "新規テンプレート",
 		"admin.editTemplate": "テンプレートの編集",
-		"admin.scheduleTask": "タスクの予定",
+		"admin.scheduleTask": "クエストの予定",
 
 		"common.save": "保存",
 		"common.cancel": "キャンセル",
