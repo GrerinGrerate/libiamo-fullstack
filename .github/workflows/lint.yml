@@ -2,14 +2,12 @@ name: Lint
 
 on:
   push:
-    branches:
-      - main
   pull_request:
-    branches:
-      - main
+    types: [opened, synchronize, reopened]
+  workflow_dispatch:
 
 jobs:
-  test:
+  biome:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -23,4 +21,4 @@ jobs:
         with:
           version: latest
       - name: Run Biome
-        run: biome ci .
+        run: biome ci --error-on-warnings .
