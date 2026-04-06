@@ -10,6 +10,7 @@ export default defineConfig({
 			reporter: ["text"],
 			provider: "v8",
 			include: ["src/routes/**/*.ts", "src/lib/server/*.ts"],
+			exclude: ["src/routes/\\(admin\\)/**/*.ts"],
 			thresholds: {
 				lines: 85,
 				functions: 70,

@@ -19,8 +19,10 @@ export const actions: Actions = {
 			return fail(400, { errors: result.error.flatten().fieldErrors, values: raw });
 		}
 
+		const body = Object.fromEntries(Object.entries(result.data).filter(([_, v]) => v !== undefined));
+
 		await auth.api.updateUser({
-			body: result.data,
+			body,
 			headers: event.request.headers,
 		});
 

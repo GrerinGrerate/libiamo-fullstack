@@ -14,8 +14,7 @@ vi.mock("$lib/server/auth", () => ({
 vi.mock("better-auth/api", () => {
 	class MockAPIError extends Error {
 		constructor(code: string, opts?: { message: string }) {
-			super();
-			this.message = opts?.message || code;
+			super(opts?.message ?? code);
 			this.name = "APIError";
 		}
 	}
@@ -114,13 +113,7 @@ describe("Sign-in +page.server", () => {
 
 			vi.mocked(auth.api.signInEmail).mockResolvedValueOnce({} as never);
 
-			try {
-				await actions.default(event);
-				expect.fail("Should have thrown a redirect");
-			} catch (error: any) {
-				expect(error.status).toBe(302);
-				expect(error.location).toBe("/");
-			}
+			await expect(actions.default(event)).rejects.toMatchObject({ status: 302, location: "/" });
 
 			expect(auth.api.signInEmail).toHaveBeenCalledWith({
 				body: {

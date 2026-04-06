@@ -15,14 +15,26 @@ vi.mock("$lib/server/auth", () => ({
 vi.mock("better-auth/api", () => {
 	class MockAPIError extends Error {
 		constructor(code: string, opts?: { message: string }) {
-			super();
-			this.message = opts?.message || code;
+			super(opts?.message ?? code);
 			this.name = "APIError";
 		}
 	}
 
 	return { APIError: MockAPIError };
 });
+
+const createEvent = (entries: Record<string, string>) => {
+	const formData = new FormData();
+	for (const [key, value] of Object.entries(entries)) {
+		formData.append(key, value);
+	}
+
+	return {
+		request: {
+			formData: async () => formData,
+		},
+	} as any;
+};
 
 describe("Forgot-password +page.server", () => {
 	beforeEach(() => {
@@ -48,19 +60,6 @@ describe("Forgot-password +page.server", () => {
 	});
 
 	describe("requestReset action", () => {
-		const createEvent = (entries: Record<string, string>) => {
-			const formData = new FormData();
-			for (const [key, value] of Object.entries(entries)) {
-				formData.append(key, value);
-			}
-
-			return {
-				request: {
-					formData: async () => formData,
-				},
-			} as any;
-		};
-
 		it("returns 400 for invalid email", async () => {
 			const result = (await actions.requestReset(
 				createEvent({
@@ -111,19 +110,6 @@ describe("Forgot-password +page.server", () => {
 	});
 
 	describe("resetPassword action", () => {
-		const createEvent = (entries: Record<string, string>) => {
-			const formData = new FormData();
-			for (const [key, value] of Object.entries(entries)) {
-				formData.append(key, value);
-			}
-
-			return {
-				request: {
-					formData: async () => formData,
-				},
-			} as any;
-		};
-
 		it("returns 400 for invalid reset payload", async () => {
 			const result = (await actions.resetPassword(
 				createEvent({
@@ -146,18 +132,14 @@ describe("Forgot-password +page.server", () => {
 		});
 
 		it("resets password and redirects on success", async () => {
-			try {
-				await actions.resetPassword(
+			await expect(
+				actions.resetPassword(
 					createEvent({
 						newPassword: "new-password-123",
 						token: "reset-token",
 					}),
-				);
-				expect.fail("Should have thrown a redirect");
-			} catch (error: any) {
-				expect(error.status).toBe(302);
-				expect(error.location).toBe("/sign-in?reset=success");
-			}
+				),
+			).rejects.toMatchObject({ status: 302, location: "/sign-in?reset=success" });
 
 			expect(auth.api.resetPassword).toHaveBeenCalledWith({
 				body: {
