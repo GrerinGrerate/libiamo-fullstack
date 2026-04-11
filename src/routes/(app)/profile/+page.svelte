@@ -1,52 +1,105 @@
 <script lang="ts">
-import { enhance } from "$app/forms";
-import { Button } from "$lib/components/ui/button";
-import * as Card from "$lib/components/ui/card";
-import { Input } from "$lib/components/ui/input";
-import { Label } from "$lib/components/ui/label";
-import { Separator } from "$lib/components/ui/separator";
+	import { enhance } from "$app/forms";
+	import { Button } from "$lib/components/ui/button";
+	import * as Card from "$lib/components/ui/card";
+	import { Input } from "$lib/components/ui/input";
+	import { Label } from "$lib/components/ui/label";
+	import { Separator } from "$lib/components/ui/separator";
+	import { onMount } from "svelte";
 
-let { form, data } = $props();
+	let { form, data } = $props();
 
-const languages = [
-	{ value: "en", label: "English" },
-	{ value: "es", label: "Español" },
-	{ value: "fr", label: "Français" },
-	{ value: "ja", label: "日本語" },
-];
+	const allTimezones = Intl.supportedValuesOf("timeZone").map((tz) => {
+		try {
+			const parts = new Intl.DateTimeFormat("en-US", {
+				timeZone: tz,
+				timeZoneName: "shortOffset",
+			}).formatToParts(new Date());
+
+			const offset =
+				parts.find((p) => p.type === "timeZoneName")?.value || "";
+
+			const utcOffset = offset.replace("GMT", "UTC");
+
+			return {
+				value: tz,
+				label: `${tz} (${utcOffset})`,
+			};
+		} catch (e) {
+			return { value: tz, label: tz };
+		}
+	});
+
+	const languages = [
+		{ value: "en", label: "English" },
+		{ value: "es", label: "Español" },
+		{ value: "fr", label: "Français" },
+		{ value: "ja", label: "日本語" },
+	];
+
+	let timezoneInputValue = $state("");
+	let detectedTimezone = $state("");
+
+	$effect(() => {
+		const val = form?.values?.timezone ?? data.user.timezone ?? "";
+		timezoneInputValue = val;
+	});
+
+	onMount(() => {
+		detectedTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+	});
+
+	function applyDetectedTimezone() {
+		timezoneInputValue = detectedTimezone;
+	}
 </script>
 
 <div class="mx-auto max-w-2xl space-y-8">
 	<h1 class="text-3xl font-bold">Profile</h1>
 
 	{#if form?.success}
-		<p class="rounded-md bg-green-50 p-3 text-sm text-green-700">Profile updated.</p>
+		<p class="rounded-md bg-green-50 p-3 text-sm text-green-700">
+			Profile updated.
+		</p>
 	{/if}
 
 	<Card.Root>
 		<Card.Content class="pt-6">
 			<div class="flex items-center gap-6">
-				<img src={data.avatarUrl} alt="User Avatar" class="h-24 w-24 rounded-full border border-gray-200 object-cover shadow-sm">
+				<img
+					src={data.avatarUrl}
+					alt="User Avatar"
+					class="h-24 w-24 rounded-full border border-gray-200 object-cover shadow-sm"
+				/>
 				<div class="space-y-1">
 					<h2 class="text-xl font-semibold">{data.user.name}</h2>
 					<p class="text-sm text-muted-foreground">
 						Your avatar is connected to your email via
-						<a href="https://cravatar.cn" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline font-medium"> Cravatar </a>.
+						<a
+							href="https://cravatar.cn"
+							target="_blank"
+							rel="noopener noreferrer"
+							class="text-primary hover:underline font-medium"
+						>
+							Cravatar
+						</a>.
 					</p>
-					<p class="text-xs text-muted-foreground">Want a custom image? Upload it at Gravatar/Cravatar and it will sync here automatically!</p>
+					<p class="text-xs text-muted-foreground">
+						Want a custom image? Upload it at Gravatar/Cravatar and
+						it will sync here automatically!
+					</p>
 				</div>
 			</div>
 		</Card.Content>
 	</Card.Root>
 
 	<Card.Root>
-		<Card.Header> <Card.Title>Settings</Card.Title> </Card.Header>
+		<Card.Header><Card.Title>Settings</Card.Title></Card.Header>
 		<Card.Content>
 			<form
 				method="POST"
 				action="?/updateProfile"
 				use:enhance={() => {
-					// Prevent default form reset on success to keep input values
 					return async ({ update }) => {
 						await update({ reset: false });
 					};
@@ -55,15 +108,49 @@ const languages = [
 			>
 				<div class="space-y-2">
 					<Label for="name">Name</Label>
-					<Input id="name" name="name" value={form?.values?.name ?? data.user.name ?? ''} />
+					<Input
+						id="name"
+						name="name"
+						value={form?.values?.name ?? data.user.name ?? ""}
+					/>
 					{#if form?.errors?.name}
-						<p class="text-sm text-red-600">{form.errors.name[0]}</p>
+						<p class="text-sm text-red-600">
+							{form.errors.name[0]}
+						</p>
 					{/if}
 				</div>
 
 				<div class="space-y-2">
 					<Label for="timezone">Timezone</Label>
-					<Input id="timezone" name="timezone" value={form?.values?.timezone ?? data.user.timezone ?? ''} placeholder="e.g. America/New_York" />
+					<select
+						id="timezone"
+						name="timezone"
+						bind:value={timezoneInputValue}
+						class="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
+					>
+						<option value="" disabled>Select your timezone</option>
+						{#each allTimezones as tz}
+							<option value={tz.value}>
+								{tz.label}
+							</option>
+						{/each}
+					</select>
+
+					{#if detectedTimezone && timezoneInputValue !== detectedTimezone}
+						<div class="mt-1 text-xs text-muted-foreground">
+							Current local timezone: <span
+								class="font-bold text-foreground"
+								>{detectedTimezone}</span
+							>.
+							<button
+								type="button"
+								class="ml-1 text-black underline hover:no-underline font-medium"
+								onclick={applyDetectedTimezone}
+							>
+								Use this instead
+							</button>
+						</div>
+					{/if}
 				</div>
 
 				<div class="space-y-2">
@@ -71,7 +158,9 @@ const languages = [
 					<Input
 						id="nativeLanguage"
 						name="nativeLanguage"
-						value={form?.values?.nativeLanguage ?? data.user.nativeLanguage ?? ''}
+						value={form?.values?.nativeLanguage ??
+							data.user.nativeLanguage ??
+							""}
 						placeholder="e.g. zh-CN, ja, ko"
 					/>
 				</div>
@@ -82,12 +171,25 @@ const languages = [
 	</Card.Root>
 
 	<Card.Root>
-		<Card.Header> <Card.Title>Learning Language</Card.Title> </Card.Header>
+		<Card.Header><Card.Title>Learning Language</Card.Title></Card.Header>
 		<Card.Content>
-			<form method="POST" action="?/switchLanguage" use:enhance class="flex items-center gap-3">
-				<select name="language" class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background">
+			<form
+				method="POST"
+				action="?/switchLanguage"
+				use:enhance
+				class="flex items-center gap-3"
+			>
+				<select
+					name="language"
+					class="flex h-10 rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background"
+				>
 					{#each languages as lang}
-						<option value={lang.value} selected={data.user.activeLanguage === lang.value}>{lang.label}</option>
+						<option
+							value={lang.value}
+							selected={data.user.activeLanguage === lang.value}
+						>
+							{lang.label}
+						</option>
 					{/each}
 				</select>
 				<Button type="submit" variant="secondary">Switch</Button>
@@ -97,5 +199,7 @@ const languages = [
 
 	<Separator />
 
-	<form method="POST" action="?/signOut" use:enhance><Button type="submit" variant="outline">Sign Out</Button></form>
+	<form method="POST" action="?/signOut" use:enhance>
+		<Button type="submit" variant="outline">Sign Out</Button>
+	</form>
 </div>
